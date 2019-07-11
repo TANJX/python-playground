@@ -10,6 +10,9 @@ import os
 import datetime
 import random
 
+import imagehash
+from PIL import Image
+
 
 def log(msg):
     print('[' + current_time_str() + '] ' + str(msg))
@@ -20,7 +23,8 @@ def current_time_str():
     return now.strftime("%m/%d/%Y, %H:%M:%S")
 
 
-path = 'C:\\Users\\marstan\\OneDrive\\Pictures\\Anime\\Anmi'
+# path = input('Path: ')
+path = 'C:\\Users\\marstan\\OneDrive\\Pictures\\Anime\\Anmi\\图'
 
 files = []
 paths = []
@@ -31,12 +35,14 @@ signature_dict = {}
 # r=root, d=directories, f = files
 for r, d, f in os.walk(path):
     for file in f:
+        log('hashing ' + file)
         (filename, ext) = os.path.splitext(file)
         if ext in img_exts:
             full_name = os.path.join(r, file)
             paths.append(full_name.replace(path, ''))
             files.append(file)
-            signature_dict[file] = 'a'
+            image_hash = imagehash.average_hash(Image.open(full_name))
+            signature_dict[file] = image_hash
 
 f = open("result.txt", "w")
 f.write(current_time_str() + "\n")
@@ -49,12 +55,12 @@ for x in range(len(files)):
     similar_images = {}
     for y in range(x + 1, len(files)):
         image_b = files[y]
-        if random.random() < 0.001:
-            similar_images[y] = random.random()
+        if signature_dict[image_a] - signature_dict[image_b] < 5:
+            similar_images[y] = signature_dict[image_a] - signature_dict[image_b]
     if len(similar_images) > 0:
         f.write('Similar images for ' + paths[x] + '\n')
         for image_y, val in similar_images.items():
-            f.write('\t' + paths[image_y] + '  (' + str(round(val * 100, 2)) + '%)\n')
+            f.write('\t' + paths[image_y] + '  (' + str(round(val, 2)) + '%)\n')
         f.write('\n\n')
 
 f.close()
