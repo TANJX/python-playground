@@ -27,7 +27,6 @@ def current_time_str():
 path = 'C:\\Users\\marstan\\OneDrive\\Pictures\\Anime\\Anmi\\图'
 
 files = []
-paths = []
 
 img_exts = ['.jpg', '.jpeg', 'png']
 signature_dict = {}
@@ -35,33 +34,56 @@ signature_dict = {}
 # r=root, d=directories, f = files
 for r, d, f in os.walk(path):
     for file in f:
-        log('hashing ' + file)
         (filename, ext) = os.path.splitext(file)
         if ext in img_exts:
+            log('hashing ' + file)
             full_name = os.path.join(r, file)
-            paths.append(full_name.replace(path, ''))
-            files.append(file)
+            key = full_name.replace(path, '').replace('\\', '', 1)
+            files.append(key)
             image_hash = imagehash.average_hash(Image.open(full_name))
-            signature_dict[file] = image_hash
+            signature_dict[key] = image_hash
 
 f = open("result.txt", "w")
 f.write(current_time_str() + "\n")
 f.write("Comparing results for " + str(len(files)) + " images.\n\n\n")
 
+similar_images = []
+
 for x in range(len(files)):
     image_a = files[x]
     percent = x / len(files) * 100
     log('(' + str(round(percent, 2)) + '%) ' + 'Finding similar images for ' + image_a)
-    similar_images = {}
     for y in range(x + 1, len(files)):
         image_b = files[y]
-        if signature_dict[image_a] - signature_dict[image_b] < 5:
-            similar_images[y] = signature_dict[image_a] - signature_dict[image_b]
-    if len(similar_images) > 0:
-        f.write('Similar images for ' + paths[x] + '\n')
-        for image_y, val in similar_images.items():
-            f.write('\t' + paths[image_y] + '  (' + str(round(val, 2)) + '%)\n')
-        f.write('\n\n')
+        if signature_dict[image_a] - signature_dict[image_b] < 3:
+            found = False
+            count = 0
+            for image_group in similar_images:
+                if image_a in image_group and image_b in image_group:
+                    found = True
+                    break
+                if image_a in image_group and image_b not in image_group:
+                    similar_images[count].append(image_b)
+                    found = True
+                    break
+                count += 1
+            if not found:
+                image_group = [image_a, image_b]
+                similar_images.append(image_group)
+
+log('(100%) Completed!')
+
+similar_images.sort(key=lambda item: -len(item))
+
+for image_group in similar_images:
+    f.write('Similar images\n')
+    count = len(image_group)
+    for image in image_group:
+        f.write('\t' + image + '\n')
+        if '合集散图' in image and count > 1:
+            os.remove(os.path.join(path, image))
+            count -= 1
+            log('Removed' + image)
+    f.write('\n\n')
 
 f.close()
-log('(100%) Completed!')
