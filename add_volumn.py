@@ -15,8 +15,8 @@ def current_time_str():
 
 curr = 0
 count = 0
-path = 'C:\\Users\\marstan\\AppData\\Roaming\\Anki2\\User 1\\collection.media\\'
-save_path = 'C:\\Users\\marstan\\Desktop\\export'
+path = 'C:/Users/david/AppData/Roaming/Anki2/Mars/collection.media/'
+save_path = 'C:/Users/david/Desktop/export'
 data_dbfs = []
 data_rms = []
 
