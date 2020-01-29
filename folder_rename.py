@@ -1,6 +1,6 @@
 import os
 
-my_path = 'W:/Occupation/works/Works 2019/[2019.12.15]New Year/footage/12.15/scene 3/audio'
+my_path = 'Y:/working/[2019.12.15]New Year/footage/1.19/audio'
 
 folders = os.listdir(my_path)
 
