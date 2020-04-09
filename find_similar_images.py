@@ -23,20 +23,32 @@ def current_time_str():
     return now.strftime("%m/%d/%Y, %H:%M:%S")
 
 
-# path = input('Path: ')
-path = 'C:\\Users\\marstan\\OneDrive\\Pictures\\Anime\\Anmi\\图'
+path = input('Path: ')
+# path = 'C:\\Users\\marstan\\OneDrive\\Pictures\\Anime\\Anmi\\图'
 
 files = []
 
 img_exts = ['.jpg', '.jpeg', 'png']
 signature_dict = {}
 
-# r=root, d=directories, f = files
+count = 0
 for r, d, f in os.walk(path):
     for file in f:
         (filename, ext) = os.path.splitext(file)
         if ext in img_exts:
-            log('hashing ' + file)
+            count += 1
+
+log('Processing ' + str(count) + ' images')
+
+# r=root, d=directories, f = files
+current = 0
+for r, d, f in os.walk(path):
+    for file in f:
+        (filename, ext) = os.path.splitext(file)
+        if ext in img_exts:
+            percent = current / count * 100
+            current += 1
+            log('(' + str(round(percent, 2)) + '%) ' + 'Hashing ' + file)
             full_name = os.path.join(r, file)
             key = full_name.replace(path, '').replace('\\', '', 1)
             files.append(key)
@@ -55,7 +67,7 @@ for x in range(len(files)):
     log('(' + str(round(percent, 2)) + '%) ' + 'Finding similar images for ' + image_a)
     for y in range(x + 1, len(files)):
         image_b = files[y]
-        if signature_dict[image_a] - signature_dict[image_b] < 3:
+        if signature_dict[image_a] - signature_dict[image_b] <= 1:
             found = False
             count = 0
             for image_group in similar_images:
@@ -80,10 +92,10 @@ for image_group in similar_images:
     count = len(image_group)
     for image in image_group:
         f.write('\t' + image + '\n')
-        if '合集散图' in image and count > 1:
-            os.remove(os.path.join(path, image))
-            count -= 1
-            log('Removed' + image)
+        # if '合集散图' in image and count > 1:
+        #     os.remove(os.path.join(path, image))
+        #     count -= 1
+        #     log('Removed' + image)
     f.write('\n\n')
 
 f.close()
