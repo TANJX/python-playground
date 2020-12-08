@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-import math
+import os
 
 MAX_YS = 180
 FILE = "data/ys.txt"
@@ -12,12 +12,10 @@ def print_ys(full_time):
     print("当前体力\t%d" % curr_ys)
     for t in [20, 40, 60, 80, 120, 160]:
         if curr_ys < t:
-            dt = datetime.fromtimestamp(time.time() + (t - curr_ys) * 8 * 60)
-            if dt.date() == datetime.fromtimestamp(time.time()).date():
-                # today
-                print("%d体力\t今天%d:%d" % (t, dt.hour, dt.minute))
-            else:
-                print("%d体力\t明天%d:%d" % (t, dt.hour, dt.minute))
+            dt = datetime.fromtimestamp(now + (t - curr_ys) * 8 * 60)
+            date = '今天' if dt.date() == datetime.fromtimestamp(now).date() else '明天'
+            minute = '%s' % dt.minute if dt.minute >= 10 else '0%s' % dt.minute
+            print("%d体力\t%s%d:%s" % (t, date, dt.hour, minute))
     print("\n")
 
 
@@ -29,10 +27,11 @@ if __name__ == '__main__':
 
     while True:
         v = input('输入体力变动（+40, -20...), s保存，q退出\n')
+        os.system('clear')
         change = 0
         if v == 'q':
             exit(0)
-        if v == 's':
+        elif v == 's':
             f = open(FILE, "w")
             f.write("%d" % full_time)
             f.close()
